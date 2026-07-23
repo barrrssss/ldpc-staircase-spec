@@ -1,0 +1,10 @@
+# Conformance vectors must be byte-identical on every platform and checkout.
+# Treat all raw vector blobs as binary so Git never applies EOL conversion.
+vectors/*.bin binary
+
+# The manifest is text but must keep LF so its on-disk bytes are stable across
+# platforms (consumers parse it; some hash it). Never convert to CRLF.
+vectors/MANIFEST.json text eol=lf
+
+# Markdown spec/readme: normalize to LF in the repo.
+*.md text eol=lf
