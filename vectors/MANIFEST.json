@@ -1,6 +1,6 @@
 {
   "manifestVersion": 1,
-  "description": "ldpc-staircase conformance vectors (constrained RFC 5170 LDPC-Staircase, the shared specification profile). Symbol payloads are produced by a documented SplitMix64 PRNG; see VectorGenerator. Every implementation must reproduce these byte-for-byte.",
+  "description": "ldpc-staircase conformance vectors for the constrained RFC 5170 LDPC-Staircase profile. Symbol payloads are produced by a documented SplitMix64 PRNG; see VectorGenerator. Every implementation must reproduce these byte-for-byte.",
   "prngRaw": [
     {"name": "raw-seed-1", "seed": 1, "values": [{"ordinal": 1, "value": 16807}, {"ordinal": 2, "value": 282475249}, {"ordinal": 3, "value": 1622650073}, {"ordinal": 10, "value": 2007237709}, {"ordinal": 100, "value": 892053144}, {"ordinal": 10000, "value": 1043618065}]},
     {"name": "raw-seed-12345", "seed": 12345, "values": [{"ordinal": 1, "value": 207482415}, {"ordinal": 2, "value": 1790989824}, {"ordinal": 3, "value": 2035175616}, {"ordinal": 4, "value": 77048696}, {"ordinal": 5, "value": 24794531}]},

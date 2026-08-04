@@ -1,0 +1,47 @@
+# History
+
+This file records both normative specification releases and noteworthy
+implementation releases. Implementation entries are included here when they change
+performance, resource use, or operational behavior enough that all maintainers
+should understand them. They do not become part of the wire contract merely by being
+listed here.
+
+## Unreleased specification documentation — 2026-08-04
+
+- Established independent semantic versioning for the specification and each
+  implementation.
+- Recorded the Java residual-solver optimization described below and classified it
+as protocol-neutral. `SPEC.md`, matrix construction, encoded symbols, public API,
+  canonical vector payloads, and expected values are unchanged.
+- Removed consuming-application references so the shared contract and implementation
+  history remain general-purpose.
+
+The normative specification remains **0.1.0**.
+
+## Java 0.1.1 — 2026-08-04
+
+A large near-threshold decode on a mobile runtime exposed excessive time in the dense
+tail of residual Gauss–Jordan elimination. Early progress was quick, while later
+pivots became much slower as rows filled in.
+
+The Java decoder was improved in two ways:
+
+- residual right-hand sides are packed once into ordinary `long[]` rows, avoiding
+  repeated byte-array view dispatch in the elimination hot loop; and
+- unresolved repair variables are ordered before source variables because staircase
+  repair columns occur in at most two equations, reducing early fill-in.
+
+The release changes neither encoding nor the decoding result. Verification included
+the unchanged cross-language conformance vectors and an old/new differential suite
+covering 864 cases across nine geometries, including odd symbol lengths,
+near-threshold received sets, and rank-deficient failures. It compared encoded bytes,
+decode metadata, presence masks, and every output symbol.
+
+The .NET implementation did not receive the optimization and therefore remains
+**0.1.0**.
+
+## Specification 0.1.0 / Java 0.1.0 / .NET 0.1.0 — 2026-07-23
+
+- Initial constrained RFC 5170 LDPC-Staircase profile.
+- Initial canonical PRNG, matrix, encode, and decode conformance vectors.
+- Initial Java 11 and .NET implementations.

@@ -1,8 +1,8 @@
 # ldpc-staircase — format & math specification
 
 `ldpc-staircase` is a **systematic, fixed-rate LDPC-Staircase erasure code over
-GF(2)** following the RFC 5170 section 6 core, constrained to the profile selected by
-the shared profile (`SPEC.md`).
+GF(2)** following the RFC 5170 section 6 core, constrained to the profile defined
+here.
 Given `K` equal-length source symbols it produces `R` repair symbols by sparse XOR,
 such that a decoder can usually reconstruct the source from `K + D` received symbols,
 where `D` is a measured margin rather than a guarantee.
@@ -15,7 +15,7 @@ out — and independent of any consuming product.
 
 ## 1. Profile
 
-The implemented profile is exactly the the shared specification constrained profile:
+The implemented profile is:
 
 - the RFC 5170 section 6 LDPC-Staircase core;
 - systematic source symbols;
@@ -239,9 +239,8 @@ This yields the maximal set of variables the received symbols determine, so no
 further peeling pass can add anything — which is why the profile forbids one.
 
 An implementation MAY refuse to start stage 2 when `|U|` exceeds a caller-supplied
-bound, and report the decode as failed. This is the seam through which a product
-enforces a memory seatbelt; it does not change the byte-level contract for any
-decode that does run.
+bound, and report the decode as failed. This lets a caller enforce a resource limit;
+it does not change the byte-level contract for any decode that does run.
 
 ### 6.3 Result
 
@@ -252,8 +251,8 @@ decoder's result, never from a received-symbol count.
 
 ## 7. Conformance vectors
 
-[`vectors/MANIFEST.json`](vectors/MANIFEST.json) indexes all cases. Five kinds,
-matching the the shared specification validation gate:
+[`vectors/MANIFEST.json`](vectors/MANIFEST.json) indexes all cases. Five kinds are
+used for conformance validation:
 
 - **prng** — `seed`, an ordinal, and the expected raw `next()` value, plus sampled
   `rand(maxv)` draws.
@@ -287,8 +286,8 @@ for i = 0 .. R-1:
 
 No I/O, compression, encryption, framing, container, or page-layout concerns. In
 particular the deterministic source/repair **interleaving** across physical pages
-required by the shared specification belongs to the encoded set format, not to this codec: the library
+belongs to a consuming transport or container format, not to this codec: the library
 operates purely on in-memory symbol byte arrays and their ESIs.
 
 Choosing `seed`, choosing `N1`, measuring the recovery margin `D`, and deriving a
-memory seatbelt are likewise product decisions made by the consumer of this library.
+resource limit are likewise application decisions made by the consumer of this library.
