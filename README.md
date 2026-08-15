@@ -55,7 +55,18 @@ listed with its byte length and SHA-256.
 ## Status
 
 Private, pre-release. The specification is intentionally general-purpose and
-independent of any consuming product. License TBD before any public release.
+independent of any consuming product.
+
+## License
+
+[Apache License 2.0](LICENSE), matching both implementations.
+
+Apache-2.0 was chosen over a shorter permissive licence specifically because this is
+patent-adjacent material: section 3 grants every user an express patent licence from the
+contributors, which MIT, BSD and 0BSD do not, and its defensive-termination clause ends
+that grant for anyone who brings a patent claim over the work. Licensing the
+specification on the same terms as the code matters here, because an independent
+reimplementation works from this document rather than from either implementation.
 
 The specification and implementation packages use independent semantic versions. A
 protocol-neutral optimization bumps only the implementation that changed; normative
