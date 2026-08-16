@@ -75,5 +75,7 @@ math, vector, or serialization changes bump this repository's version. See
 
 Original work was written from RFC 5170 and independent analysis. No OpenFEC or other
 third-party codec source was copied. The provenance and IPR guardrails are engineering
-constraints, not a legal opinion, and a counsel-led review remains open before any
-production use.
+constraints, not a legal opinion. The consuming product closed its IPR gate on an
+engineering review on 2026-08-15 and accepted the residual risk, so production use is not
+blocked here; no professional freedom-to-operate search was performed. Adding any excluded
+technique is a profile change that requires new vectors and a fresh IPR review.
