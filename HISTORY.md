@@ -18,6 +18,16 @@ as protocol-neutral. `SPEC.md`, matrix construction, encoded symbols, public API
 
 The normative specification remains **0.1.0**.
 
+## Java 0.1.2 / .NET 0.1.2 — 2026-08-23
+
+- Java replaced the parity-check matrix object forest with flat primitive adjacency
+  storage, reducing allocations without changing graph construction or codec output.
+- Java added Maven Central metadata and moved its Gradle build to Kotlin DSL while
+  retaining Java 11 artifact compatibility.
+- .NET added NuGet publication metadata and advances as a packaging-only companion;
+  its codec behavior and public API are unchanged.
+- Both packages continue to conform to specification 0.1.0 and the same vectors.
+
 ## Java 0.1.1 — 2026-08-04
 
 A large near-threshold decode on a mobile runtime exposed excessive time in the dense
@@ -37,9 +47,8 @@ covering 864 cases across nine geometries, including odd symbol lengths,
 near-threshold received sets, and rank-deficient failures. It compared encoded bytes,
 decode metadata, presence masks, and every output symbol.
 
-The .NET implementation did not receive the optimization. It advances to **0.1.1** as
-a packaging-only companion release so NuGet and Maven expose one implementation
-family version; codec behavior and conformance remain unchanged.
+The .NET implementation did not receive this optimization and remained **0.1.0** at
+that point. The later 0.1.2 public package line aligns both runtimes as described above.
 
 ## Specification 0.1.0 / Java 0.1.0 / .NET 0.1.0 — 2026-07-23
 

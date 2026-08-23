@@ -59,8 +59,18 @@ Therefore:
 
 - specification remains `0.1.0`;
 - Java advances from `0.1.0` to `0.1.1`; and
-- .NET advances to `0.1.1` as a packaging-only companion release so the Maven and
-  NuGet artifacts remain on the same implementation release line.
+- .NET remains `0.1.0` at that point because its implementation did not change.
+
+## Publication amendment (2026-08-23)
+
+The Java tip later added protocol-neutral flat primitive graph storage and publication
+metadata after the documented 0.1.1 implementation. Reusing 0.1.1 for that changed
+binary would make the changelog and artifacts ambiguous. The first public package line
+therefore advances both implementations to 0.1.2:
+
+- specification remains `0.1.0`;
+- Java is `0.1.2`; and
+- .NET is `0.1.2` as a packaging-only companion release, with no codec/API change.
 
 ## Consequences
 
