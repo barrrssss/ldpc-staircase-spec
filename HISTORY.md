@@ -6,10 +6,10 @@ performance, resource use, or operational behavior enough that all maintainers
 should understand them. They do not become part of the wire contract merely by being
 listed here.
 
-## Unreleased specification documentation — 2026-08-04
+## Unreleased specification documentation — 2026-08-23
 
-- Established independent semantic versioning for the specification and each
-  implementation.
+- Kept the normative specification version independent while establishing one shared
+  implementation release line for the Java and .NET packages.
 - Recorded the Java residual-solver optimization described below and classified it
 as protocol-neutral. `SPEC.md`, matrix construction, encoded symbols, public API,
   canonical vector payloads, and expected values are unchanged.
@@ -37,8 +37,9 @@ covering 864 cases across nine geometries, including odd symbol lengths,
 near-threshold received sets, and rank-deficient failures. It compared encoded bytes,
 decode metadata, presence masks, and every output symbol.
 
-The .NET implementation did not receive the optimization and therefore remains
-**0.1.0**.
+The .NET implementation did not receive the optimization. It advances to **0.1.1** as
+a packaging-only companion release so NuGet and Maven expose one implementation
+family version; codec behavior and conformance remain unchanged.
 
 ## Specification 0.1.0 / Java 0.1.0 / .NET 0.1.0 — 2026-07-23
 

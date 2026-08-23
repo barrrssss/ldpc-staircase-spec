@@ -54,8 +54,8 @@ listed with its byte length and SHA-256.
 
 ## Status
 
-Private, pre-release. The specification is intentionally general-purpose and
-independent of any consuming product.
+Pre-1.0 release candidate. The specification is intentionally general-purpose and
+defines only symbol-level coding behavior.
 
 ## License
 
@@ -68,14 +68,14 @@ that grant for anyone who brings a patent claim over the work. Licensing the
 specification on the same terms as the code matters here, because an independent
 reimplementation works from this document rather than from either implementation.
 
-The specification and implementation packages use independent semantic versions. A
-protocol-neutral optimization bumps only the implementation that changed; normative
-math, vector, or serialization changes bump this repository's version. See
+The specification and implementation packages use independent semantic versions.
+Normative math, vector, or serialization changes bump this repository's version;
+implementation-only changes bump the Java and .NET packages together. See
 [`docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md`](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md).
 
-Original work was written from RFC 5170 and independent analysis. No OpenFEC or other
-third-party codec source was copied. The provenance and IPR guardrails are engineering
-constraints, not a legal opinion. The consuming product closed its IPR gate on an
-engineering review on 2026-08-15 and accepted the residual risk, so production use is not
-blocked here; no professional freedom-to-operate search was performed. Adding any excluded
-technique is a profile change that requires new vectors and a fresh IPR review.
+This project independently implements the algorithmic profile described by
+[RFC 5170](https://www.rfc-editor.org/rfc/rfc5170.html). No OpenFEC or other
+third-party codec source was copied. See [`NOTICE`](NOTICE) for attribution. This
+provenance statement and the project's engineering IPR review are not a legal opinion
+or a professional freedom-to-operate search. Adding an excluded technique is a profile
+change that requires new vectors and a fresh review.

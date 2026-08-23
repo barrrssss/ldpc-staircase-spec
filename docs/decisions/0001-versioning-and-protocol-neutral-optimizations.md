@@ -1,7 +1,7 @@
 # 0001 — Versioning and protocol-neutral optimizations
 
 - Status: Accepted
-- Date: 2026-08-04
+- Date: 2026-08-04; amended 2026-08-23
 
 ## Context
 
@@ -17,18 +17,19 @@ be bumped in lockstep even when only one runtime changed.
 
 ## Decision
 
-The specification and each implementation use **independent semantic versions** while
-they are pre-1.0:
+The normative specification and the implementation release line use **independent
+semantic versions** while they are pre-1.0:
 
 - `ldpc-staircase-spec` versions the normative math, deterministic construction,
   serialization, decoder contract, and conformance vectors.
-- `ldpc-staircase-java` versions the Java package and its implementation behavior.
-- `ldpc-staircase-dotnet` versions the .NET package and its implementation behavior.
+- `ldpc-staircase-java` and `ldpc-staircase-dotnet` share one implementation package
+  version so Maven and NuGet coordinates communicate the same family release.
 
 A compatible implementation-only bug fix, performance optimization, resource-use
-improvement, test improvement, or packaging correction receives a patch release in
-the implementation that changed. Other implementations do not bump merely to keep
-numbers aligned.
+improvement, test improvement, or packaging correction advances the shared
+implementation patch version. An implementation without the runtime change receives a
+companion packaging release whose changelog states that its API, codec behavior,
+specification, and conformance vectors are unchanged.
 
 A normative change to the graph, PRNG, encoding equations, symbol interpretation,
 required decode semantics, or canonical vectors changes the specification version.
@@ -58,14 +59,17 @@ Therefore:
 
 - specification remains `0.1.0`;
 - Java advances from `0.1.0` to `0.1.1`; and
-- .NET remains `0.1.0` because its implementation did not change.
+- .NET advances to `0.1.1` as a packaging-only companion release so the Maven and
+  NuGet artifacts remain on the same implementation release line.
 
 ## Consequences
 
 - Consumers must track both the specification version and the implementation package
-  version; equal numbers across repositories are neither required nor implied.
+  version. The specification number need not equal the package number, but Java and
+  .NET package numbers must match for each family release.
 - Implementation release notes must identify the issue abstractly, state whether the
   wire contract changed, and name the conformance or differential evidence.
 - Protocol-neutral changes must not regenerate vectors just to produce a visible
   version change.
-- Package tags should match the declared package version when a release is published.
+- Java and .NET package tags should match their shared declared package version when
+  a release is published.

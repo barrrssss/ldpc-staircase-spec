@@ -11,7 +11,7 @@ This document is the normative contract. Any implementation that follows it prod
 **byte-identical** repair symbols, builds an **identical** parity check matrix, and
 recovers identically; the committed conformance vectors in [`vectors/`](vectors/)
 verify this. The library is deliberately abstract — symbol bytes in, symbol bytes
-out — and independent of any consuming product.
+out — and independent of any transport, storage format, or application.
 
 ## 1. Profile
 
