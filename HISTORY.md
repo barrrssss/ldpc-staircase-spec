@@ -6,6 +6,31 @@ performance, resource use, or operational behavior enough that all maintainers
 should understand them. They do not become part of the wire contract merely by being
 listed here.
 
+## Unreleased specification documentation — 2026-09-01
+
+- Added the independent, dependency-free reference checker of
+  [decision 0002](docs/decisions/0002-independent-reference-checker.md) under
+  [`reference/`](reference/), together with its `unittest` self-tests, its committed
+  differential corpus, and its usage and provenance record. It verifies every committed
+  vector directly from `SPEC.md` without importing or invoking either implementation,
+  and both implementations now compare their differential corpus results against it.
+- Clarified `SPEC.md` section 6: decoding requires **at least one present symbol**, and
+  all present symbols must share one length. The symbol length is read from a received
+  symbol, so an entirely empty received set leaves `S` undefined and is a caller error
+  rather than an incomplete decode.
+
+  This was the first finding of the new checker. It answered "incomplete decode" for a
+  fully empty received set while both implementations rejected the call. The
+  implementations were right and the specification was silent, so the specification now
+  states the rule the implementations already enforced.
+
+  Classified under [decision 0001](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md)
+  as documentation-only clarification: it changes no graph, PRNG, encoding equation,
+  symbol interpretation, or canonical vector, and no defined input's result changes. No
+  vector regeneration is required.
+
+The normative specification remains **0.1.0**.
+
 ## Unreleased specification documentation — 2026-08-23
 
 - Kept the normative specification version independent while establishing one shared

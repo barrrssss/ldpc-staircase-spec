@@ -204,6 +204,12 @@ mix of source and repair symbols may be present. Decoding recovers as many missi
 **source** symbols as the received set determines. It is not required to reconstruct
 missing repair symbols.
 
+**At least one symbol MUST be present.** The symbol length `S` is not carried in the
+present-mask; it is read from a received symbol, so an entirely empty received set
+leaves `S` undefined and cannot describe a decode at all. An empty received set is a
+caller error rather than an incomplete decode, and an implementation MUST reject it
+instead of reporting a result. All present symbols MUST have the same length.
+
 Decoding runs in two stages and MUST NOT iterate between them.
 
 ### 6.1 Stage 1 — degree-one peeling to a fixed point

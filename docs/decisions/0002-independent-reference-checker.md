@@ -1,6 +1,6 @@
 # 0002 — Use an independent dependency-free reference checker
 
-- Status: Accepted; implementation pending
+- Status: Accepted; implemented 2026-09-01
 - Date: 2026-08-31
 
 ## Context
@@ -142,6 +142,36 @@ The independent-oracle evidence is complete only when all of the following are t
 
 Until those criteria are met, the repository may say that an independent checker is
 planned or in progress, but not that independent-oracle validation is closed.
+
+### Status at implementation, 2026-09-01
+
+1. **Met.** [`reference/ldpc_staircase_reference.py`](../../reference/ldpc_staircase_reference.py),
+   [`reference/test_reference_checker.py`](../../reference/test_reference_checker.py),
+   [`reference/corpus.json`](../../reference/corpus.json), and
+   [`reference/README.md`](../../reference/README.md) are committed.
+2. **Met.** `check-vectors vectors/MANIFEST.json` passes every committed PRNG, matrix,
+   encode, and decode vector, plus every blob length and digest, using only the Python
+   standard library.
+3. **Met.** `ReferenceCorpusTest` (Java) and `ReferenceCorpusTests` (.NET) run the
+   corpus and compare every reported field with the checker's answer. Both suites pass,
+   and both were confirmed to fail when the checker's answer is deliberately perturbed.
+4. **Met.** The corpus covers `R = 0`, `K = 1`, `R = 1`, `N1` from 1 to `R` including the
+   default 7, seeds at both ends of the allowed range, odd and even symbol lengths from
+   `S = 1`, peeling-only, residual-required, and rank-deficient outcomes, every loss
+   shape listed above, and shapes up to `K = 500`, `R = 250`.
+5. **Pending a reviewer.** The provenance record required by rule 6 is in
+   [`reference/README.md`](../../reference/README.md); the structural rules are asserted
+   by the checker's own self-tests. A human reviewer still has to confirm it.
+6. **Pending.** This repository has no written pre-release checklist yet. The commands
+   and the required-mode environment variables are documented in
+   [`reference/README.md`](../../reference/README.md), and folding them into a checklist
+   is left to whoever writes one.
+
+The checker's first differential run produced one finding, recorded in
+[`HISTORY.md`](../../HISTORY.md): the specification did not say that decoding requires at
+least one present symbol, while both implementations enforced it. `SPEC.md` section 6
+now states the rule. This is the intended behavior of the gate — a disagreement was
+examined, and the specification, not an implementation, turned out to be at fault.
 
 ## Non-goals
 

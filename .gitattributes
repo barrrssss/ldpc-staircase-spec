@@ -8,3 +8,8 @@ vectors/MANIFEST.json text eol=lf
 
 # Markdown spec/readme: normalize to LF in the repo.
 *.md text eol=lf
+
+# The reference checker and its corpus are read on every platform. Keep LF so the
+# committed bytes are stable and the corpus parses identically everywhere.
+reference/*.py text eol=lf
+reference/corpus.json text eol=lf
