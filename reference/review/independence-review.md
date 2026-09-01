@@ -198,18 +198,57 @@ rule 1 as an attestation by the implementer, recorded in
 
 ## Open recommendations
 
-1. **Extend the committed vectors to exercise section 4.3.** The corpus now covers it; the
-   normative vectors still do not. This needs the authorized generator and is a
-   specification change, so it belongs in its own decision.
-2. **Consider one derivation from RFC 5170 rather than from `SPEC.md`**, to attack the
-   section 6.2 reservation above. Larger than this round; worth it only if the decode
-   contract is ever in doubt.
-3. **`recoveredCount` and `recoveredRepair` rest on convention, not requirement.** Raised by
-   `codex-derivation`: section 6 says a decoder is not required to reconstruct missing
-   repair symbols, yet the corpus compares fields that count them. A conforming decoder
-   that stopped as soon as every source symbol was known would report fewer recovered
-   repairs without changing `complete`. All five calculations happen to recover repairs.
-   Either say so normatively in section 6 or stop comparing those two fields.
+### 1. Extend the committed vectors to exercise section 4.3 — RESOLVED, specification 0.1.1
+
+Done on 2026-09-01. Three matrix vectors and one encode vector were added through the
+single authorized generator: `mtx-k2-r8-n1_1-s1`, `mtx-k8-r16-n1_2-s3`,
+`mtx-k3-r6-n1_1-smax`, and `enc-k2-r8-n1_1-s1-len5`. Section 4.3 now adds 53 entries
+across the vector set, where it added none before, and both of its branches fire.
+
+The addition is purely additive — every vector committed at 0.1.0 is byte-identical at
+0.1.1 — and was confirmed as such by comparing the regenerated manifest section by
+section before and after. A regeneration with no changes was run first to establish that
+generation is deterministic.
+
+Because the generator is the Java implementation and section 4.3 was exactly the
+subsection no gate covered, the new vectors were validated by every calculation that does
+*not* share the generator's reading: the independent reference checker (804 to 899
+checks), the Claude derivation seat (70 to 82 checks), and the Codex derivation seat (123
+to 140 assertions). All pass.
+
+### 2. Consider one derivation from RFC 5170 rather than from `SPEC.md` — OPEN, not recommended for now
+
+Left open deliberately. This is the only one of the three that would address the audit's
+section 6.2 reservation, and it is also the only one whose value is speculative. Three
+things argue for leaving it:
+
+- RFC 5170 describes a broader scheme than the profile section 1 constrains, so a seat
+  working from the RFC would diverge on profile choices — `G = 1`, fixed rate, the single
+  residual solve, the `K >= 2` degenerate rule — and produce disagreements that are
+  scope differences rather than findings. Separating the two would take more judgement
+  than the exercise saves.
+- The reservation it addresses is narrow: a misreading embedded in section 6.2's own
+  recovery criterion. That criterion is four sentences of standard linear algebra, and
+  five implementations across four languages now agree on its consequences for 36 corpus
+  cases and six decode vectors.
+- The audit itself scoped it as conditional: worth doing only if the decode contract is
+  ever in genuine doubt.
+
+Revisit if a decode disagreement ever appears, or before the profile is extended.
+
+### 3. `recoveredCount` and `recoveredRepair` rest on convention — RESOLVED, specification 0.1.1
+
+Raised by `codex-derivation`. Investigating it showed the specification contradicted its
+own vectors rather than merely leaving latitude: section 6 said reconstructing missing
+repair symbols was not required, but `dec-all-repair-missing` loses only repair symbols
+and requires a recovered count of `R`, so a decoder taking the stated latitude would fail
+a normative vector.
+
+Section 6 now states that decoding recovers and reports every symbol the received set
+determines, with completion still judged on the source symbols alone. No conforming
+implementation changes behavior; the prose was the part that was wrong. The corpus is
+therefore comparing a field the contract does require, and the two fields stay in the
+comparison.
 
 ## Sign-off
 

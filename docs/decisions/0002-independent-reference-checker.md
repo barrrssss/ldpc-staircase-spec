@@ -160,8 +160,8 @@ planned or in progress, but not that independent-oracle validation is closed.
    `S = 1`, peeling-only, residual-required, and rank-deficient outcomes, every loss
    shape listed above, and shapes up to `K = 500`, `R = 250`. The 2026-09-01 review round
    found that section 4.3 was exercised by nothing — it added no entry in any committed
-   vector or corpus case — and five cases were added to close that gap. The committed
-   vectors still do not exercise section 4.3; see the open recommendations in the review.
+   vector or corpus case. Five corpus cases closed the corpus half, and specification
+   0.1.1 added three matrix vectors and one encode vector that close the vector half.
 5. **Evidence complete; human confirmation outstanding.** A review round was run on
    2026-09-01 and is recorded in
    [`reference/review/independence-review.md`](../../reference/review/independence-review.md).

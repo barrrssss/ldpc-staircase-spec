@@ -6,6 +6,42 @@ performance, resource use, or operational behavior enough that all maintainers
 should understand them. They do not become part of the wire contract merely by being
 listed here.
 
+## Specification 0.1.1 — 2026-09-01
+
+First change to the canonical vectors since 0.1.0. It is **additive**: every vector
+committed at 0.1.0 is byte-identical at 0.1.1, and an implementation that passed 0.1.0
+passes 0.1.1 unchanged. Under
+[decision 0001](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md) a
+change to canonical vectors bumps the specification version; the compatibility impact
+makes this a patch.
+
+- Added three matrix vectors and one encode vector that exercise `SPEC.md` section 4.3.
+  The 2026-09-01 independence review found that the low-degree-raising pass added **no
+  entry** in any committed vector — every one had exactly `N1*K + (2R - 1)` entries — so
+  two implementations could have disagreed about that entire subsection and every gate
+  would still have passed. The new cases put `N1*K` at or below `R` so rows genuinely
+  leave section 4.2 below degree two: `mtx-k2-r8-n1_1-s1` and `enc-k2-r8-n1_1-s1-len5`
+  fire both branches including a degree-0 row cascading into the degree-1 branch,
+  `mtx-k8-r16-n1_2-s3` fires the degree-1 branch on all sixteen rows, and
+  `mtx-k3-r6-n1_1-smax` does both at the top of the seed range. Section 4.3 now adds 53
+  entries across the vector set, where it added 0 before.
+
+  These vectors were produced by the single authorized generator, so they were also
+  validated against the independent reference checker and against both from-scratch
+  derivations from the review round, none of which shares the generator's reading of
+  section 4.3.
+
+- Aligned `SPEC.md` section 6 with what the vectors already required. Section 6 said a
+  decoder "is not required to reconstruct missing repair symbols", but
+  `dec-all-repair-missing` loses only repair symbols and requires a recovered count of
+  `R`, so a decoder taking that latitude would fail a normative vector. Section 6 now
+  states that decoding recovers and reports every symbol the received set determines,
+  while completion stays judged on the source symbols alone. No conforming implementation
+  changes: the vectors already settled this, and the prose was the part that was wrong.
+
+  Raised as an ambiguity by the Codex derivation seat, which noticed the latitude while
+  reading section 6 with no access to any implementation.
+
 ## Unreleased specification documentation — 2026-09-01
 
 - Ran the independence review round required by decision 0002 completion criterion 5 and
@@ -29,11 +65,11 @@ listed here.
   properties. They assert the dependency and read-only properties of rule 5 only; rules 2
   to 4 are not machine-checkable and rest on the recorded review.
 
-  Both specification changes are classified under
+  Both specification changes in this entry are classified under
   [decision 0001](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md) as
   documentation-only clarification: no graph, PRNG, encoding equation, symbol
   interpretation, or canonical vector changes, and no previously valid input's result
-  changes. No vector regeneration is required.
+  changes. They required no vector regeneration and were released as part of 0.1.1 above.
 
 - Added the independent, dependency-free reference checker of
   [decision 0002](docs/decisions/0002-independent-reference-checker.md) under

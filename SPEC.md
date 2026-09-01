@@ -201,9 +201,16 @@ Output: `R` repair symbols, each `S` bytes.
 ## 6. Decode
 
 Input: the `N` symbol slots and a present-mask marking which hold valid bytes. Any
-mix of source and repair symbols may be present. Decoding recovers as many missing
-**source** symbols as the received set determines. It is not required to reconstruct
-missing repair symbols.
+mix of source and repair symbols may be present. Decoding recovers every missing
+symbol the received set determines, and MUST report each one it recovered.
+
+Completion is judged on the **source** symbols alone (section 6.3): a decode is complete
+when all `K` of them are present, whatever became of the repair symbols. But recovering a
+missing repair symbol is not optional work a decoder may skip. Repair symbols are
+variables of the same equations, they fall out of the same solve at no extra cost, and the
+committed decode vectors record the total recovered count including them —
+`dec-all-repair-missing` loses only repair symbols and still requires a recovered count of
+`R`, so a decoder that stopped as soon as the source was complete would fail it.
 
 **At least one symbol MUST be present.** The symbol length `S` is not carried in the
 present-mask; it is read from a received symbol, so an entirely empty received set

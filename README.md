@@ -67,7 +67,7 @@ rule, and the independence record.
 | --- | --- |
 | `prngRaw` | the Park–Miller stream at listed ordinals, including RFC 5170's own `seed = 1` / 10,000th value criterion |
 | `prngBounded` | the IEEE 754 scaling into `[0, maxv)` |
-| `matrix` | parity check matrix construction, as the canonical serialization of SPEC.md section 7.1 |
+| `matrix` | parity check matrix construction, as the canonical serialization of SPEC.md section 7.1, including cases where the section 4.3 low-degree pass fires |
 | `encode` | repair symbol generation |
 | `decode` | recovery: peeling-only, residual-solve, and expected-failure outcomes |
 
