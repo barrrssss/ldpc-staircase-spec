@@ -153,9 +153,9 @@ of sections 2 to 5, but a misreading embedded in section 6.2's own recovery crit
 be reproduced by all of them. Decode-side independence evidence is therefore weaker than
 construction-side evidence, where the checker genuinely re-derives from pseudocode.
 
-The blind derivations do not remove this either — both seats read the same section 6.2. What
-would remove it is a derivation from RFC 5170 rather than from `SPEC.md`. That is a larger
-exercise and is recorded as an open recommendation.
+The blind derivations do not remove this either — both seats read the same section 6.2.
+Recommendation 2 below resolves it, by checking the criterion against the definition of
+determinacy through exhaustive enumeration rather than by deriving from the RFC.
 
 ## Rule 1: corroborated, not confirmed
 
@@ -196,7 +196,7 @@ rule 1 as an attestation by the implementer, recorded in
 - **Nothing here validates `SPEC.md` against RFC 5170 or against intent.** A defect at that
   level is invisible to all five calculations.
 
-## Open recommendations
+## Recommendations from this round
 
 ### 1. Extend the committed vectors to exercise section 4.3 — RESOLVED, specification 0.1.1
 
@@ -216,25 +216,65 @@ subsection no gate covered, the new vectors were validated by every calculation 
 checks), the Claude derivation seat (70 to 82 checks), and the Codex derivation seat (123
 to 140 assertions). All pass.
 
-### 2. Consider one derivation from RFC 5170 rather than from `SPEC.md` — OPEN, not recommended for now
+### 2. The section 6.2 reservation — RESOLVED, by exhaustive enumeration rather than by an RFC derivation
 
-Left open deliberately. This is the only one of the three that would address the audit's
-section 6.2 reservation, and it is also the only one whose value is speculative. Three
-things argue for leaving it:
+The audit's reservation was that the checker and both implementations compute the same
+mathematical object, so all of them would reproduce a misreading embedded in section 6.2's
+own recovery criterion rather than catch it. The blind derivations do not remove this
+either: both seats read the same section 6.2. The original recommendation was to derive
+once from RFC 5170 instead.
 
-- RFC 5170 describes a broader scheme than the profile section 1 constrains, so a seat
-  working from the RFC would diverge on profile choices — `G = 1`, fixed rate, the single
-  residual solve, the `K >= 2` degenerate rule — and produce disagreements that are
-  scope differences rather than findings. Separating the two would take more judgement
-  than the exercise saves.
-- The reservation it addresses is narrow: a misreading embedded in section 6.2's own
-  recovery criterion. That criterion is four sentences of standard linear algebra, and
-  five implementations across four languages now agree on its consequences for 36 corpus
-  cases and six decode vectors.
-- The audit itself scoped it as conditional: worth doing only if the decode contract is
-  ever in genuine doubt.
+**That was the wrong instrument, and it was not used.** Two reasons:
 
-Revisit if a decode disagreement ever appears, or before the profile is extended.
+- RFC 5170 describes a broader scheme than the profile of section 1, which deliberately
+  excludes LDPC-Triangle, `G > 1`, rateless repair, inactivation, and repeated
+  elimination-to-peeling cycles. A seat working from the RFC would build those too and
+  make different choices everywhere this profile narrowed, so its disagreements would be
+  scope differences dressed as findings.
+- More decisively, the RFC is not where section 6.2's criterion comes from. "A variable is
+  recovered exactly when it is a pivot variable whose RREF row contains no other variable"
+  is not an inherited convention that could have been copied down wrong. It is a claim
+  about linear algebra, true or false on its own terms. Checking it against the RFC cannot
+  settle it.
+
+**What was done instead.** The criterion is a shortcut for a plainer definition: a lost
+symbol is determined exactly when it holds the same value in every assignment consistent
+with the received symbols. That definition can be computed directly on small cases —
+enumerate every candidate assignment to the missing symbols, keep the ones satisfying all
+parity equations, and see which symbols came out identical across all of them. It uses no
+row reduction, no pivots, and no peeling, so it shares nothing with the machinery under
+test.
+
+The sweep, run 2026-09-01:
+
+| | |
+| --- | --- |
+| configurations (`K`, `R`, `N1`, seed) | 660 |
+| loss patterns, exhaustive per configuration | 608,192 |
+| missing symbols compared | 3,310,284 |
+| disagreements | **0** |
+
+Both halves matched every time: which symbols the received set determines, and the bytes
+of each one. Every recovered value was also checked against the original codeword.
+
+The sample is not trivially easy, which matters — a sweep in which everything is
+recoverable would never exercise the part of the criterion that decides a symbol is *not*
+determined. Across a characterised subset: 42.4% of patterns fully recovered, 41.9%
+partially recovered, 15.7% recovered nothing, and 57.6% had genuinely underdetermined
+systems with more than one consistent assignment, the largest admitting 64.
+
+A bounded version is now a permanent self-test, `ExhaustiveCriterionTest` in
+[`../test_reference_checker.py`](../test_reference_checker.py): 1,728 loss patterns over
+eight configurations, in about three seconds, with a companion test asserting the sweep
+still contains fully recovered, partially recovered, and unrecoverable cases so it cannot
+quietly decay into checking only easy ones.
+
+**What this does and does not settle.** It establishes that section 6.2's criterion agrees
+with the definition of determinacy on every small case tried, so a wrong criterion is
+excluded within that range. It does not extend to large systems by proof, and it says
+nothing about whether the *profile* around it — peeling to a fixed point, then at most one
+residual solve, never iterating — is the right profile. That is a design choice of section
+1, not a mathematical claim, and no derivation of any kind would validate it.
 
 ### 3. `recoveredCount` and `recoveredRepair` rest on convention — RESOLVED, specification 0.1.1
 

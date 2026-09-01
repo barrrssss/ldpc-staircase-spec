@@ -171,7 +171,9 @@ planned or in progress, but not that independent-oracle validation is closed.
    and all twelve compared fields. A hostile similarity audit against both production
    implementations returned PASS on rules 2, 3, 4, and 5. Rule 1 is corroborated but not
    confirmed, because it is a claim about process rather than a property of the artifacts.
-   The self-tests assert rule 5's dependency and read-only properties only. No agent may
+   The self-tests assert rule 5's dependency and read-only properties only. All three
+   recommendations the round produced are now resolved, including a check of section 6.2's
+   recovery criterion against exhaustive enumeration of the solution set. No agent may
    grant this criterion; it closes on a human signature in that record.
 6. **Pending.** This repository has no written pre-release checklist yet. The commands
    and the required-mode environment variables are documented in

@@ -61,6 +61,17 @@ makes this a patch.
   implementations could have disagreed about it entirely without any gate noticing. The
   committed vectors still do not exercise section 4.3; closing that needs the authorized
   generator and its own decision.
+- Closed the last open recommendation of the independence review by checking `SPEC.md`
+  section 6.2's recovery criterion against the definition it stands for. Enumerating every
+  consistent assignment on small systems — no row reduction, pivots, or peeling — agreed
+  with the criterion on all 608,192 loss patterns across 660 configurations and 3,310,284
+  missing symbols, on both which symbols are determined and their bytes. A bounded version
+  is now a permanent self-test. This matters because every other calculation in the
+  project reaches its answer by Gaussian elimination and would therefore reproduce a
+  mistake in the criterion rather than catch it. The originally recommended derivation
+  from RFC 5170 was **not** used, and the reasoning is recorded in the review: the RFC
+  describes a broader scheme than this profile, and it is not the source of that criterion
+  in the first place.
 - Narrowed the claim that the checker's self-tests assert its structural independence
   properties. They assert the dependency and read-only properties of rule 5 only; rules 2
   to 4 are not machine-checkable and rest on the recorded review.

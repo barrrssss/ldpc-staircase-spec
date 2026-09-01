@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import itertools
 import json
 import shutil
 import sys
@@ -593,6 +594,140 @@ class DifferentialCorpusTest(unittest.TestCase):
                     "missing": [99],
                 }
             )
+
+
+class ExhaustiveCriterionTest(unittest.TestCase):
+    """Check SPEC.md section 6.2's recovery criterion against the definition.
+
+    Section 6.2 gives a *shortcut*: a lost symbol is recovered exactly when it is a
+    pivot variable whose RREF row contains no other variable. The definition that
+    shortcut stands for is plainer: a lost symbol is determined exactly when it holds
+    the same value in every assignment consistent with the received symbols.
+
+    Everything else in this repository — the checker, both production
+    implementations, and the differential corpus — computes recoverability by some
+    form of Gaussian elimination, so all of them would reproduce a mistake in the
+    criterion itself rather than catch it. These tests compute the definition the dumb
+    way instead, by enumerating every candidate assignment and keeping the consistent
+    ones. No row reduction, no pivots, no peeling.
+
+    A wider sweep of the same comparison is recorded in
+    ``review/independence-review.md``; what runs here is the bounded subset.
+    """
+
+    @staticmethod
+    def _determined_by_enumeration(matrix, codeword, present, symbol_len):
+        """Symbols holding one value across every consistent assignment.
+
+        One bit plane at a time: over GF(2) the coefficient matrix is the same for
+        every bit position, so a symbol is determined exactly when all of its bits are.
+        """
+        unknown = [c for c in range(matrix.n) if not present[c]]
+        position = {column: index for index, column in enumerate(unknown)}
+        width = len(unknown)
+
+        masks = []
+        for row in range(matrix.r):
+            mask = 0
+            for column in matrix.rows[row]:
+                if not present[column]:
+                    mask |= 1 << position[column]
+            masks.append(mask)
+
+        bits = {column: [] for column in unknown}
+        for byte_index in range(symbol_len):
+            for bit in range(8):
+                rhs = []
+                for row in range(matrix.r):
+                    value = 0
+                    for column in matrix.rows[row]:
+                        if present[column]:
+                            value ^= (codeword[column][byte_index] >> bit) & 1
+                    rhs.append(value)
+
+                solutions = []
+                for candidate in range(1 << width):
+                    for row in range(matrix.r):
+                        if bin(masks[row] & candidate).count("1") & 1 != rhs[row]:
+                            break
+                    else:
+                        solutions.append(candidate)
+                if not solutions:
+                    raise AssertionError("the codeword itself is always a consistent assignment")
+
+                for column in unknown:
+                    values = {(s >> position[column]) & 1 for s in solutions}
+                    bits[column].append(values.pop() if len(values) == 1 else None)
+
+        determined = {}
+        for column in unknown:
+            if all(b is not None for b in bits[column]):
+                out = bytearray(symbol_len)
+                for index, bit in enumerate(bits[column]):
+                    if bit:
+                        out[index // 8] |= 1 << (index % 8)
+                determined[column] = bytes(out)
+        return determined
+
+    CONFIGURATIONS = (
+        (2, 4, 1, 1),
+        (3, 4, 2, 7),
+        (4, 4, 3, 4242),
+        (2, 6, 1, 1),
+        (5, 3, 2, 12345),
+        (4, 5, 1, MODULUS - 1),
+        (6, 2, 2, 99),
+        (1, 3, 1, 7),
+    )
+
+    def _sweep(self):
+        """Yield (config, missing, truth, claimed) over every small loss pattern."""
+        for k, r, n1, seed in self.CONFIGURATIONS:
+            matrix = ref.build_matrix(k, r, n1, seed)
+            source = ref.corpus_source_symbols(0x5EED ^ seed, k, 1)
+            codeword = source + ref.encode(matrix, source)
+            for size in range(1, matrix.n):
+                for missing in itertools.combinations(range(matrix.n), size):
+                    absent = set(missing)
+                    present = [i not in absent for i in range(matrix.n)]
+                    received = [codeword[i] if present[i] else None for i in range(matrix.n)]
+                    truth = self._determined_by_enumeration(matrix, codeword, present, 1)
+                    claimed = ref.solve_whole_system(matrix, received, present, 1).recovered
+                    yield (k, r, n1, seed), missing, truth, claimed, codeword
+
+    def test_criterion_matches_exhaustive_enumeration(self):
+        cases = 0
+        for config, missing, truth, claimed, codeword in self._sweep():
+            cases += 1
+            label = f"K={config[0]} R={config[1]} N1={config[2]} seed={config[3]} missing={missing}"
+            self.assertEqual(
+                sorted(truth), sorted(claimed),
+                f"{label}: section 6.2 disagrees with the definition about which "
+                "symbols the received set determines",
+            )
+            for column, value in truth.items():
+                self.assertEqual(claimed[column], value, f"{label}: wrong bytes for symbol {column}")
+                self.assertEqual(codeword[column], value, f"{label}: symbol {column} is not the original")
+        self.assertGreater(cases, 500, "the sweep collapsed to too few cases to mean anything")
+
+    def test_the_sweep_is_not_trivially_easy(self):
+        """Guard the guard: the sweep must contain cases where recovery is incomplete.
+
+        If every pattern in the sweep were fully recoverable the comparison above would
+        pass without ever exercising the part of the criterion that decides a symbol is
+        *not* determined.
+        """
+        full = partial = nothing = 0
+        for _, missing, truth, _, _ in self._sweep():
+            if len(truth) == len(missing):
+                full += 1
+            elif truth:
+                partial += 1
+            else:
+                nothing += 1
+        self.assertGreater(full, 0, "no fully recovered case")
+        self.assertGreater(partial, 0, "no partially recovered case")
+        self.assertGreater(nothing, 0, "no unrecoverable case")
 
 
 class IndependenceTest(unittest.TestCase):

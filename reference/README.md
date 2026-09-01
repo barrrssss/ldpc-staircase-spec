@@ -95,6 +95,27 @@ residual rank. Those stay in the Java and .NET conformance suites, which keeps t
 oracle algorithmically independent while the complete public decoder contract is still
 covered.
 
+## Checking the checker's own criterion
+
+`SPEC.md` section 6.2 states a shortcut: a lost symbol is recovered exactly when it is a
+pivot variable whose RREF row contains no other variable. Every other calculation in this
+project — the checker, both production implementations, the differential corpus — reaches
+its answer by some form of Gaussian elimination, so all of them would reproduce a mistake
+in that criterion rather than catch it.
+
+`ExhaustiveCriterionTest` in `test_reference_checker.py` computes the definition the
+shortcut stands for, directly: a lost symbol is determined exactly when it holds the same
+value in every assignment consistent with the received symbols. It enumerates every
+candidate assignment, keeps the ones satisfying all parity equations, and compares. No row
+reduction, no pivots, no peeling.
+
+It runs 1,728 loss patterns over eight small configurations in about three seconds, with a
+companion test asserting the sweep still contains fully recovered, partially recovered,
+and unrecoverable cases, so it cannot decay into checking only easy ones. A wider sweep —
+608,192 loss patterns over 660 configurations, 3,310,284 missing symbols, zero
+disagreements — is recorded in
+[`review/independence-review.md`](review/independence-review.md).
+
 ## The differential corpus
 
 [`corpus.json`](corpus.json) is a committed set of parameters, seeds, and explicit loss
