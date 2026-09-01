@@ -277,12 +277,22 @@ used for conformance validation:
 - **decode** — the indices missing from the `N` symbols → the expected completion
   flag, the stage that was required (`NONE` / `PEELING` / `RESIDUAL_SOLVE`), the
   number of symbols recovered, and the source indices expected to remain missing.
-  Cases cover peeling-only, residual-solve, and expected-failure recoveries.
+  Cases cover peeling-only, residual-solve, and expected-failure recoveries. The
+  missing list is given inline as `missing`, or, for cases that lose more symbols
+  than a readable manifest can carry, as a `missingBlob` reference (section 7.2).
+  A case carries exactly one of the two.
 
 Symbol data is stored as raw `*.bin` files: one blob per part, holding that part's
 symbols concatenated in ascending ESI order at the case's fixed `S`. `MANIFEST.json`
 references every blob with its byte length and SHA-256 digest. Every implementation
 MUST reproduce all vectors byte-for-byte.
+
+The cases span both ends of the profile's range. Most are small enough to check by
+hand, which is what makes them precise about the algorithms. At least one matrix,
+encode, and decode case is also carried at the top of the calibrated envelope
+(`K = 16000`, `R = 8192`), where the matrix build draws six figures of PRNG values
+and the residual solve spans thousands of unknowns. An implementation can agree on
+every small case and still diverge there, so conformance requires both.
 
 ### 7.1 Canonical matrix serialization
 
@@ -295,6 +305,19 @@ for i = 0 .. R-1:
     u32  d                   // number of ones in row i
     u32  c  x d              // their column indices, strictly ascending
 ```
+
+### 7.2 Missing-index blobs
+
+A decode case whose `missing` list is impractical to inline references it as
+`missingBlob` instead. The blob is the bare index sequence, with no header:
+
+```
+u32  i  x (length / 4)       // missing symbol indices, strictly ascending
+```
+
+Indices are big-endian, strictly ascending, and each is below `N`. The count is the
+blob's byte length divided by four. A reader MUST accept both forms and treat them
+as equivalent.
 
 ## 8. Out of scope
 

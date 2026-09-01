@@ -30,6 +30,18 @@ Verify every committed conformance vector — the release-gate command:
 python reference/ldpc_staircase_reference.py check-vectors vectors/MANIFEST.json
 ```
 
+That takes about 30 seconds. Nearly all of it is the two production-scale decode cases:
+the checker reduces the whole system to RREF in pure Python, which is what makes it an
+independent oracle and also what makes it cubic. To skip them during iteration, bound the
+solve:
+
+```bash
+python reference/ldpc_staircase_reference.py check-vectors vectors/MANIFEST.json   --max-decode-unknowns 256
+```
+
+Skipped cases are listed in the summary. They are never counted as passed, and the release
+gate is the unbounded command above.
+
 Compute the differential corpus results into a scratch file:
 
 ```bash

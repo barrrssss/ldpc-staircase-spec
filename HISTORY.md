@@ -6,6 +6,50 @@ performance, resource use, or operational behavior enough that all maintainers
 should understand them. They do not become part of the wire contract merely by being
 listed here.
 
+## Specification 0.1.2 — 2026-09-01
+
+Second additive change to the canonical vectors. Every vector committed at 0.1.1 is
+byte-identical at 0.1.2, and no graph, PRNG, encoding equation, symbol interpretation,
+or decode semantic changes. Under
+[decision 0001](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md) a
+change to canonical vectors bumps the specification version; the compatibility impact
+makes this a patch.
+
+- Added production-scale vectors at `K = 16000`, `R = 8192`, `N1 = 7`: one matrix case,
+  one encode case, and two decode cases. Before this the canonical vectors reached
+  `K = 250` for matrices and `K = 120` for encoding and decoding, while the profile is
+  calibrated to `K = 16000` and `R = 8192`. Both implementations exercise large shapes in
+  their own internal tests, but internal tests are not a cross-runtime oracle: nothing
+  committed made the two runtimes agree on a single byte above `K = 250`.
+
+  Scale is not a formality here. `mtx-k16000-r8192-n1_7-s8191` has 128,383 entries built
+  from 112,000 bounded PRNG draws, against 1,999 entries in the largest previous matrix,
+  so an implementation whose bounded scaling drifts only in a rare arm of the IEEE 754
+  path now has six figures of draws to drift in. `dec-large-residual` loses 6,144 symbols
+  and finishes in the residual solve, a system thousands of unknowns wide, where the
+  largest previous residual solve had at most 60 — an elimination order or pivot rule that
+  is subtly wrong is invisible at `K = 120` and decisive here. `dec-large-peeling` loses
+  4,096 and completes by peeling alone over a 24,192-node graph.
+
+  Symbol length for the large encode case is deliberately short (`S = 8`). Symbols are
+  combined by XOR, so symbol length is independent of everything the large shape
+  exercises, and a short one keeps the added blobs under 800 KB.
+
+- Added the `missingBlob` form for decode cases (`SPEC.md` section 7.2) and raised
+  `manifestVersion` from 1 to 2. The large decode cases lose thousands of symbols;
+  inlining those index lists would have made the manifest mostly integers. The version
+  was raised deliberately rather than relying on the addition being ignorable: a reader
+  that skipped an unknown `missingBlob` field would treat the case's received set as
+  complete and silently report a pass on a decode it never ran. Every reader now fails
+  on the version instead, which is the loud failure a conformance artifact owes its
+  consumers. A reader that understands both forms needs no other change.
+
+- The independent reference checker validates the new cases from `SPEC.md` alone: both
+  large decode cases agree on completion, recovered count, still-missing source indices,
+  recovered bytes, and stage. `check-vectors` takes about 31 seconds unbounded, since the
+  checker reduces the whole system to RREF in pure Python; `--max-decode-unknowns` skips
+  the large solves for a fast pass and reports them as skipped, never as passed.
+
 ## Specification 0.1.1 — 2026-09-01
 
 First change to the canonical vectors since 0.1.0. It is **additive**: every vector

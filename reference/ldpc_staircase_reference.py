@@ -484,9 +484,14 @@ class CheckReport:
     def __init__(self) -> None:
         self.checks = 0
         self.failures: List[str] = []
+        self.skipped: List[str] = []
 
     def ok(self) -> None:
         self.checks += 1
+
+    def skip(self, message: str) -> None:
+        """Record a case that was deliberately not run. Never counts as a check."""
+        self.skipped.append(message)
 
     def fail(self, message: str) -> None:
         self.checks += 1
@@ -685,8 +690,53 @@ def check_parity_holds(
     report.ok()
 
 
-def check_decodes(manifest: dict, encoded: Dict[str, EncodedCase], report: CheckReport) -> None:
-    """Recoverability and recovered bytes for every committed decode vector."""
+def _missing_indices(case: dict, vectors_dir: Path) -> List[int]:
+    """A decode case's missing list, in either form of SPEC.md section 7.
+
+    Inline ``missing`` or a ``missingBlob`` of big-endian ``u32`` indices. Exactly
+    one must be present: a case whose form this checker did not understand would
+    otherwise be checked against a received set it silently treated as complete.
+    """
+    name = case["name"]
+    inline = case.get("missing")
+    blob_name = case.get("missingBlob")
+    if (inline is None) == (blob_name is None):
+        raise SpecViolation(
+            f"decode[{name}]: exactly one of missing / missingBlob must be present"
+        )
+
+    if inline is not None:
+        return list(inline)
+
+    blob = _read_blob(vectors_dir, blob_name)
+    if len(blob) % 4:
+        raise SpecViolation(
+            f"decode[{name}]: missingBlob length {len(blob)} is not a multiple of 4"
+        )
+
+    indices = [
+        int.from_bytes(blob[i * 4 : (i + 1) * 4], "big") for i in range(len(blob) // 4)
+    ]
+    if any(b <= a for a, b in zip(indices, indices[1:])):
+        raise SpecViolation(f"decode[{name}]: missingBlob must be strictly ascending")
+    return indices
+
+
+def check_decodes(
+    manifest: dict,
+    encoded: Dict[str, EncodedCase],
+    vectors_dir: Path,
+    report: CheckReport,
+    max_unknowns: Optional[int] = None,
+) -> None:
+    """Recoverability and recovered bytes for every committed decode vector.
+
+    ``max_unknowns`` bounds the whole-system solve. This checker reduces the entire
+    system to RREF in pure Python, which is what makes it an independent oracle and
+    also what makes it cubic: the production-scale decode vectors have thousands of
+    unknowns and take minutes rather than the milliseconds a compiled decoder needs.
+    Cases above the bound are reported as skipped, never as passed.
+    """
     for case in _require_list(manifest, "decode"):
         name = case["name"]
         reference = encoded.get(case["encodeCase"])
@@ -697,11 +747,18 @@ def check_decodes(manifest: dict, encoded: Dict[str, EncodedCase], report: Check
         symbol_len = encode_case["symbolLen"]
         codeword = list(source) + list(repair)
 
-        missing = set(case["missing"])
+        missing = set(_missing_indices(case, vectors_dir))
         present = [index not in missing for index in range(matrix.n)]
         received: List[Optional[bytes]] = [
             codeword[index] if present[index] else None for index in range(matrix.n)
         ]
+
+        if max_unknowns is not None and len(missing) > max_unknowns:
+            report.skip(
+                f"decode[{name}]: {len(missing)} unknowns exceeds the "
+                f"--max-decode-unknowns bound of {max_unknowns}"
+            )
+            continue
 
         outcome = solve_whole_system(matrix, received, present, symbol_len)
         report.expect_equal(outcome.complete, case["expectComplete"], f"decode[{name}] complete")
@@ -787,7 +844,9 @@ def check_zero_repair(report: CheckReport) -> None:
     report.expect_equal(outcome.missing_source, [2], "R=0: the lost index must be reported")
 
 
-def check_vectors(manifest_path: Path, report: CheckReport) -> None:
+def check_vectors(
+    manifest_path: Path, report: CheckReport, max_decode_unknowns: Optional[int] = None
+) -> None:
     """Run every vector family in the manifest against the specification."""
     vectors_dir = manifest_path.parent
     if not manifest_path.is_file():
@@ -798,17 +857,17 @@ def check_vectors(manifest_path: Path, report: CheckReport) -> None:
         raise SpecViolation(f"malformed manifest {manifest_path}: {error}") from error
     if not isinstance(manifest, dict):
         raise SpecViolation(f"malformed manifest {manifest_path}: top level is not an object")
-    if manifest.get("manifestVersion") != 1:
+    if manifest.get("manifestVersion") != 2:
         raise SpecViolation(
             f"unsupported manifestVersion {manifest.get('manifestVersion')!r}; "
-            "this checker reads version 1"
+            "this checker reads version 2"
         )
 
     check_files(manifest, vectors_dir, report)
     check_prng(manifest, report)
     check_matrices(manifest, vectors_dir, report)
     encoded = check_encodes(manifest, vectors_dir, report)
-    check_decodes(manifest, encoded, report)
+    check_decodes(manifest, encoded, vectors_dir, report, max_decode_unknowns)
     check_zero_repair(report)
 
 
@@ -969,6 +1028,8 @@ def _report_exit(report: CheckReport, label: str, verbose: bool) -> int:
             print(f"  ... and {len(report.failures) - 50} more", file=sys.stderr)
         return 1
     print(f"OK: {label}: {report.checks} checks passed")
+    for line in report.skipped:
+        print(f"  SKIPPED: {line}")
     if verbose:
         print("No production implementation was imported, loaded, or invoked.")
     return 0
@@ -978,7 +1039,7 @@ def _cmd_check_vectors(args: argparse.Namespace) -> int:
     manifest_path = Path(args.manifest)
     report = CheckReport()
     try:
-        check_vectors(manifest_path, report)
+        check_vectors(manifest_path, report, args.max_decode_unknowns)
     except SpecViolation as error:
         print(f"FAIL: {error}", file=sys.stderr)
         return 2
@@ -1048,6 +1109,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="verify every committed conformance vector against the specification",
     )
     check.add_argument("manifest", help="path to vectors/MANIFEST.json")
+    check.add_argument(
+        "--max-decode-unknowns",
+        type=int,
+        default=None,
+        help=(
+            "skip decode cases with more than this many unknowns. The whole-system "
+            "solve is cubic and written in pure Python, so the production-scale cases "
+            "take minutes; skipped cases are reported, never counted as passed. "
+            "Unbounded by default."
+        ),
+    )
     check.set_defaults(func=_cmd_check_vectors)
 
     emit = subparsers.add_parser(
