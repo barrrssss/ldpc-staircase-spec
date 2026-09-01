@@ -158,10 +158,21 @@ planned or in progress, but not that independent-oracle validation is closed.
 4. **Met.** The corpus covers `R = 0`, `K = 1`, `R = 1`, `N1` from 1 to `R` including the
    default 7, seeds at both ends of the allowed range, odd and even symbol lengths from
    `S = 1`, peeling-only, residual-required, and rank-deficient outcomes, every loss
-   shape listed above, and shapes up to `K = 500`, `R = 250`.
-5. **Pending a reviewer.** The provenance record required by rule 6 is in
-   [`reference/README.md`](../../reference/README.md); the structural rules are asserted
-   by the checker's own self-tests. A human reviewer still has to confirm it.
+   shape listed above, and shapes up to `K = 500`, `R = 250`. The 2026-09-01 review round
+   found that section 4.3 was exercised by nothing — it added no entry in any committed
+   vector or corpus case — and five cases were added to close that gap. The committed
+   vectors still do not exercise section 4.3; see the open recommendations in the review.
+5. **Evidence complete; human confirmation outstanding.** A review round was run on
+   2026-09-01 and is recorded in
+   [`reference/review/independence-review.md`](../../reference/review/independence-review.md).
+   Two agents independently implemented `SPEC.md` from scratch, in JavaScript and Python,
+   with no access to the checker or to either implementation; both reproduced every
+   committed vector and agree with the checker and with each other on all 36 corpus cases
+   and all twelve compared fields. A hostile similarity audit against both production
+   implementations returned PASS on rules 2, 3, 4, and 5. Rule 1 is corroborated but not
+   confirmed, because it is a claim about process rather than a property of the artifacts.
+   The self-tests assert rule 5's dependency and read-only properties only. No agent may
+   grant this criterion; it closes on a human signature in that record.
 6. **Pending.** This repository has no written pre-release checklist yet. The commands
    and the required-mode environment variables are documented in
    [`reference/README.md`](../../reference/README.md), and folding them into a checklist

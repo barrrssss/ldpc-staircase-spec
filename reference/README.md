@@ -177,8 +177,11 @@ Decision 0002 requires the implementation review to record the checker's provena
   `long[]` rows.
 - It imports only `argparse`, `hashlib`, `json`, `sys`, `pathlib`, and `typing`. It has
   no subprocess, dynamic loading, socket, or network use, and does not load either
-  implementation's assemblies or JARs. `test_reference_checker.py` asserts these
-  structural properties so they cannot erode.
+  implementation's assemblies or JARs. `test_reference_checker.py` asserts the
+  dependency and read-only properties of rule 5, and those tests are deliberately
+  coarse: they are name-based source scans, not enforcement. Rules 2, 3, and 4 are not
+  machine-checkable and rest on the review recorded in
+  [`review/independence-review.md`](review/independence-review.md).
 - The SplitMix64 constants of the corpus payload rule are checked against that
   algorithm's published output stream rather than against either implementation's test
   helpers.

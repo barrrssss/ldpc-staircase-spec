@@ -8,6 +8,33 @@ listed here.
 
 ## Unreleased specification documentation — 2026-09-01
 
+- Ran the independence review round required by decision 0002 completion criterion 5 and
+  recorded it under [`reference/review/`](reference/review/). Two agents implemented
+  `SPEC.md` from scratch, in JavaScript and Python, with no access to the checker or to
+  either implementation; both reproduced every committed vector and agree with the checker,
+  with each other, and with Java and .NET on all 36 differential corpus cases. A hostile
+  similarity audit returned PASS on independence rules 2 to 5.
+- Clarified `SPEC.md` section 2: `N1 >= 1` is required always, and `N1 <= R` additionally
+  when `R >= 1`. The previous wording constrained `N1` only when `R >= 1`, so a value below
+  1 was accepted at `R = 0` where `N1` is unused. Both implementations already rejected it
+  unconditionally; the checker, following the specification's letter, did not. Second
+  finding of the same shape as the section 6 precondition: the specification was permissive
+  and the implementations were right.
+- Added five differential corpus cases that exercise section 4.3. The review found that the
+  low-degree-raising pass added no entry in any committed vector or any corpus case, so two
+  implementations could have disagreed about it entirely without any gate noticing. The
+  committed vectors still do not exercise section 4.3; closing that needs the authorized
+  generator and its own decision.
+- Narrowed the claim that the checker's self-tests assert its structural independence
+  properties. They assert the dependency and read-only properties of rule 5 only; rules 2
+  to 4 are not machine-checkable and rest on the recorded review.
+
+  Both specification changes are classified under
+  [decision 0001](docs/decisions/0001-versioning-and-protocol-neutral-optimizations.md) as
+  documentation-only clarification: no graph, PRNG, encoding equation, symbol
+  interpretation, or canonical vector changes, and no previously valid input's result
+  changes. No vector regeneration is required.
+
 - Added the independent, dependency-free reference checker of
   [decision 0002](docs/decisions/0002-independent-reference-checker.md) under
   [`reference/`](reference/), together with its `unittest` self-tests, its committed

@@ -143,8 +143,10 @@ def validate_parameters(k: int, r: int, n1: int, seed: int) -> None:
         raise SpecViolation(f"K must be >= 1, got {k}")
     if r < 0:
         raise SpecViolation(f"R must be >= 0, got {r}")
-    if r >= 1 and not (1 <= n1 <= r):
-        raise SpecViolation(f"N1 must satisfy 1 <= N1 <= R, got N1={n1} R={r}")
+    if n1 < 1:
+        raise SpecViolation(f"N1 must be >= 1, got {n1}")
+    if r >= 1 and n1 > r:
+        raise SpecViolation(f"N1 must satisfy N1 <= R when R >= 1, got N1={n1} R={r}")
     if not (PRNG_MIN_SEED <= seed <= PRNG_MAX_SEED):
         raise SpecViolation(f"seed {seed} outside [{PRNG_MIN_SEED}, {PRNG_MAX_SEED}]")
     if n1 * k > INT32_MAX:

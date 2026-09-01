@@ -1233,6 +1233,77 @@
         732,
         740
       ]
+    },
+    {
+      "name": "s43-k2-r8-n1_1-len5-intact",
+      "note": "section 4.3 both branches: degree-0 rows raised to 1 and then to 2",
+      "k": 2,
+      "r": 8,
+      "n1": 1,
+      "seed": 1,
+      "symbolLen": 5,
+      "payloadSeed": 1280,
+      "missing": []
+    },
+    {
+      "name": "s43-k2-r8-n1_1-len5-source-lost",
+      "note": "section 4.3 both branches, with a source symbol lost",
+      "k": 2,
+      "r": 8,
+      "n1": 1,
+      "seed": 1,
+      "symbolLen": 5,
+      "payloadSeed": 1280,
+      "missing": [
+        1
+      ]
+    },
+    {
+      "name": "s43-k8-r16-n1_2-len16-scatter",
+      "note": "section 4.3 degree-1 branch on every row",
+      "k": 8,
+      "r": 16,
+      "n1": 2,
+      "seed": 3,
+      "symbolLen": 16,
+      "payloadSeed": 1281,
+      "missing": [
+        0,
+        3,
+        6
+      ]
+    },
+    {
+      "name": "s43-k3-r6-n1_1-smax-len7-mixed",
+      "note": "section 4.3 at the top of the seed range, odd symbol length",
+      "k": 3,
+      "r": 6,
+      "n1": 1,
+      "seed": 2147483646,
+      "symbolLen": 7,
+      "payloadSeed": 1282,
+      "missing": [
+        0,
+        2,
+        4
+      ]
+    },
+    {
+      "name": "s43-k4-r6-n1_1-len2-heavy",
+      "note": "section 4.3 with loss heavy enough to leave source unrecoverable",
+      "k": 4,
+      "r": 6,
+      "n1": 1,
+      "seed": 11,
+      "symbolLen": 2,
+      "payloadSeed": 1283,
+      "missing": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
     }
   ]
 }

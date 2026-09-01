@@ -159,6 +159,21 @@ class MatrixConstructionTest(unittest.TestCase):
         with self.assertRaises(ref.SpecViolation):
             ref.build_matrix(4, 2, 1, 0)  # seed out of range
 
+    def test_n1_below_one_is_rejected_even_when_r_is_zero(self):
+        """SPEC.md section 2 requires N1 >= 1 always.
+
+        N1 is unused when R = 0, so the earlier wording constrained it only when
+        R >= 1 and a nonsensical N1 slipped through. Both production
+        implementations rejected it regardless; the specification now says so and
+        this pins it.
+        """
+        for n1 in (0, -1, -7):
+            with self.assertRaises(ref.SpecViolation):
+                ref.build_matrix(4, 0, n1, 1)
+            with self.assertRaises(ref.SpecViolation):
+                ref.build_matrix(4, 2, n1, 1)
+        ref.build_matrix(4, 0, 1, 1)
+
     def test_setting_an_existing_entry_is_rejected(self):
         matrix = ref.ParityCheckMatrix(4, 2, 1, 1)
         matrix.set(0, 0)

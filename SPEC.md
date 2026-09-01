@@ -43,8 +43,9 @@ profile change requiring new vectors and a fresh IPR review.
 - Symbol index (ESI) `0..K-1` are the source symbols; `K..K+R-1` are the repair
   symbols. Repair symbol `p` in `0..R-1` has ESI `K + p`.
 - `N1` = the number of `1`s per source column in the left part of the parity check
-  matrix. Default profile value: **7**. Requires
-  `1 <= N1 <= R` when `R >= 1`.
+  matrix. Default profile value: **7**. Requires `N1 >= 1` always, and additionally
+  `N1 <= R` when `R >= 1`. `N1` is unused when `R = 0`, but a value below 1 is
+  meaningless rather than a no-op and MUST be rejected.
 - `seed` = the PRNG seed, a 32-bit unsigned integer in `[1, 0x7FFFFFFE]`.
 
 `(K, R, N1, seed)` fully determines the code. Two implementations given the same
