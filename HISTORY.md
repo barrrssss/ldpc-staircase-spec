@@ -86,7 +86,7 @@ makes this a patch.
   Raised as an ambiguity by the Codex derivation seat, which noticed the latitude while
   reading section 6 with no access to any implementation.
 
-## Unreleased specification documentation — 2026-09-01
+## Specification documentation, released in 0.1.1 — 2026-09-01
 
 - Ran the independence review round required by decision 0002 completion criterion 5 and
   recorded it under [`reference/review/`](reference/review/). Two agents implemented
@@ -147,19 +147,23 @@ makes this a patch.
   symbol interpretation, or canonical vector, and no defined input's result changes. No
   vector regeneration is required.
 
-The normative specification remains **0.1.0**.
+These entries were written while the normative specification was **0.1.0**. They
+changed no normative behavior, so they carried no version of their own and shipped
+with **0.1.1** above.
 
-## Unreleased specification documentation — 2026-08-23
+## Specification documentation, released in 0.1.1 — 2026-08-23
 
 - Kept the normative specification version independent while establishing one shared
   implementation release line for the Java and .NET packages.
 - Recorded the Java residual-solver optimization described below and classified it
-as protocol-neutral. `SPEC.md`, matrix construction, encoded symbols, public API,
+  as protocol-neutral. `SPEC.md`, matrix construction, encoded symbols, public API,
   canonical vector payloads, and expected values are unchanged.
 - Removed consuming-application references so the shared contract and implementation
   history remain general-purpose.
 
-The normative specification remains **0.1.0**.
+These entries were written while the normative specification was **0.1.0**. They
+changed no normative behavior, so they carried no version of their own and shipped
+with **0.1.1** above.
 
 ## Java 0.1.2 / .NET 0.1.2 — 2026-08-23
 

@@ -1,0 +1,34 @@
+name: Specification defect
+description: An ambiguity, contradiction, or gap in SPEC.md or the vectors
+labels: ["specification"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Specification version
+      placeholder: "0.1.2"
+    validations:
+      required: true
+  - type: input
+    id: section
+    attributes:
+      label: Section
+      placeholder: "4.3"
+    validations:
+      required: true
+  - type: textarea
+    id: readings
+    attributes:
+      label: The two readings
+      description: |
+        Quote the text and state the distinct behaviors it permits. The clearest
+        specification reports name the fork precisely rather than proposing wording first.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: |
+        A vector that would distinguish the readings, an implementation that took the
+        other branch, or an enumeration that settles it.
